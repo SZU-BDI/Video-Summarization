@@ -88,7 +88,7 @@ class Main:
                 distt = Shot_segmentation.segment(frame1,frame2)
 
                 print ('Processing ... ', ttt, ', of ', total_frames, 'with distt=',distt)
-                if distt >= 20000:#different images 
+                if distt >= 40000:#{ different images , 25x4
                     m_scores = np.array(m_scores)
                     [rows,cols] = m_scores.shape
                     
@@ -98,18 +98,15 @@ class Main:
                         keyframe = capture.set(0,keyframe_number)
     #                        print (keyframe_number , " \t########")
                         temp, keyframe = capture.read()
-                        pathh = '../d/frame' + str(keyframe_number) + '.png'
+                        pathh = '../d/keyframe' + str(keyframe_number) + '.png'
                         print ("############## \t 'Writing key frame at" , pathh, "'\t##############", "\a")
                         cv2.imwrite(pathh,keyframe)
                     print ("Different images = " , distt , "\t" , counter)
-                        
-                        
                     m_scores = []
                     m_scores.append([])
                     m_scores.append([])
-                    
-                    
-                else:#same images
+                    #}
+                else:#{ same images
                     #print ("Similar images= " , distt , "\t" , counter)
                     #memorability_prediction=Memorability_Prediction()
                     #m_value = memorability_prediction.mem_calculation(frame1)
@@ -118,7 +115,9 @@ class Main:
     #                scores[index][0] = m_value
                     m_scores[0].append(m_value)
                     m_scores[1].append(counter)
-                counter = counter + fps
+                    #}
+                #counter = counter + fps
+                counter = counter + 1
                 frame1 = frame2
                 # end_t = time.time()
                 # totall = end_t - start_t
@@ -161,7 +160,7 @@ class Shot_segmentation:
         #t = caclulate_distance(self,features1,features2)
         end_time1 = time.time()
         execution_time1 = end_time1 - start_time1
-        #print ("*********** \t Execution Time in shot segmentation= ", execution_time1, " secs \t***********")
+        print ("*********** \t Execution Time in shot segmentation= ", execution_time1, " secs \t***********")
         return euclidean_distances(features1,features2)
     
 class Memorability_Prediction:
@@ -171,13 +170,11 @@ class Memorability_Prediction:
         start_time1 = time.time()
         resized_image = caffe.io.resize_image(frame1,[227,227])
         net1.blobs['data'].data[...] = transformer1.preprocess('data', resized_image)
-        
-        
         value = net1.forward()
         value = value['fc8-euclidean']
         end_time1 = time.time()
         execution_time1 = end_time1 - start_time1
-        #print ("*********** \t Execution Time in Memobarility = ", execution_time1, " secs \t***********")
+        print ("*********** \t Execution Time in Memobarility = ", execution_time1, " secs \t***********")
         return value[0][0]
     
 
