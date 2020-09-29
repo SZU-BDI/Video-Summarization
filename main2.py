@@ -59,7 +59,7 @@ print ("Caffe Model for Memorability Prediction Loaded")
 
 class Main: 
     
-    def main(self):
+    def main():
         #print ("Inside main function")
         capture = cv2.VideoCapture(video_path)
         total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))#getting total number of frames
@@ -82,10 +82,13 @@ class Main:
             ret2, frame2 = capture.read()
             if ret2 is True:
 #            capture.release()
-                shot_segmentation=Shot_segmentation()
-                distt = shot_segmentation.segment(frame1,frame2)
+
+                #shot_segmentation=Shot_segmentation()
+                #distt = shot_segmentation.segment(frame1,frame2)
+                distt = Shot_segmentation.segment(frame1,frame2)
+
                 print ('Processing ... ', ttt, ', of ', total_frames, 'with distt=',distt)
-                if distt >= 10000:#different images 
+                if distt >= 20000:#different images 
                     m_scores = np.array(m_scores)
                     [rows,cols] = m_scores.shape
                     
@@ -108,8 +111,10 @@ class Main:
                     
                 else:#same images
                     #print ("Similar images= " , distt , "\t" , counter)
-                    memorability_prediction=Memorability_Prediction()
-                    m_value = memorability_prediction.mem_calculation((frame1))
+                    #memorability_prediction=Memorability_Prediction()
+                    #m_value = memorability_prediction.mem_calculation(frame1)
+                    m_value = Memorability_Prediction.mem_calculation(frame1)
+
     #                scores[index][0] = m_value
                     m_scores[0].append(m_value)
                     m_scores[1].append(counter)
@@ -134,12 +139,8 @@ class Main:
     
 #############################################################################
 class Shot_segmentation:
-    '''
-    def caclulate_distance(self,features1,features2):
-        distt = euclidean_distances(features1,features2)
-        return distt
-    '''
-    def segment(self,frame1,frame2):
+    #def segment(self,frame1,frame2):
+    def segment(frame1,frame2):
         #print ("Inside segment function")
         start_time1 = time.time()
         resized_image1 = caffe.io.resize_image(frame1,[224,224])
@@ -164,8 +165,8 @@ class Shot_segmentation:
         return euclidean_distances(features1,features2)
     
 class Memorability_Prediction:
-    
-    def mem_calculation(self,frame1):
+    #def mem_calculation(self,frame1):
+    def mem_calculation(frame1):
         #print ("Inside mem_calculation function")
         start_time1 = time.time()
         resized_image = caffe.io.resize_image(frame1,[227,227])
@@ -181,7 +182,7 @@ class Memorability_Prediction:
     
 
 if __name__ == '__main__':
-    Main().main()
+    Main.main()
 
 #class Postprocessing:
 #    def histogram_difference():
