@@ -84,8 +84,8 @@ class Main:
 #            capture.release()
                 shot_segmentation=Shot_segmentation()
                 distt = shot_segmentation.segment(frame1,frame2)
-                print ('Processing ... ', ttt, ', of ', total_frames)
-                if distt >= 40000:#different images 
+                print ('Processing ... ', ttt, ', of ', total_frames, 'with distt=',distt)
+                if distt >= 10000:#different images 
                     m_scores = np.array(m_scores)
                     [rows,cols] = m_scores.shape
                     
@@ -180,11 +180,8 @@ class Memorability_Prediction:
         return value[0][0]
     
 
-#tinu = Memorability_Prediction.mem_calculation(cv2.imread('1.jpg'))
-#print (tinu)
 if __name__ == '__main__':
-    obj=Main()
-    obj.main()
+    Main().main()
 
 #class Postprocessing:
 #    def histogram_difference():
