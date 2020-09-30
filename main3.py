@@ -34,8 +34,8 @@ Loading caffe models at once
 
 proto = "VS-Python/Models/mobilenet_v2_deploy.prototxt"
 model = "../d/mobilenet_v2.caffemodel"
-#caffe.set_mode_gpu()
-caffe.set_mode_cpu()
+caffe.set_mode_gpu()
+#caffe.set_mode_cpu()
 net = caffe.Net(proto, model, caffe.TEST)
 
 transformer = caffe.io.Transformer({'data':net.blobs['data'].data.shape})
@@ -89,7 +89,6 @@ class Main:
         end_time1 = time.time()
         execution_time1 = end_time1 - start_time1
         #print ("*********** \t Execution Time in shot segmentation= ", execution_time1, " secs \t***********")
-        print ("debug features1=", features1, "features2=", features2);
         return euclidean_distances(features1,features2)
     
     def main2():
@@ -109,9 +108,9 @@ class Main:
             ret2, frame2 = capture.read()
             if ret2 is True:
                 print (time.time(), "ttt=", ttt);
-                '''
                 distt = Main.shot_segment(frame1,frame2) # time 0.5
                 print ('Processing ... ', ttt, ', of ', total_frames, 'with distt=',distt)
+                '''
                 if distt >= 40000:#{ different images , 25x4
                     m_scores = np.array(m_scores)
                     [rows,cols] = m_scores.shape
