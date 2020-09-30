@@ -95,10 +95,11 @@ class Main:
                     if cols > 0:
                         max_index = m_scores[0].argmax()
                         keyframe_number = int(m_scores[1][max_index])
-                        keyframe = capture.set(0,keyframe_number)
+                        # CAP_PROP_POS_MSEC in microsecond
+                        keyframe = capture.set(cv2.CAP_PROP_POS_MSEC, keyframe_number)
     #                        print (keyframe_number , " \t########")
                         temp, keyframe = capture.read()
-                        pathh = '../d/keyframe' + str(keyframe_number) + '.png'
+                        pathh = '../d/frame' + str(keyframe_number).rjust(6,"0") + '.png'
                         print ("############## \t 'Writing key frame at" , pathh, "'\t##############", "\a")
                         cv2.imwrite(pathh,keyframe)
                     print ("Different images = " , distt , "\t" , counter)
@@ -116,8 +117,8 @@ class Main:
                     m_scores[0].append(m_value)
                     m_scores[1].append(counter)
                     #}
-                #counter = counter + fps
-                counter = counter + 1
+                counter = counter + fps
+                #counter = counter + 1
                 frame1 = frame2
                 # end_t = time.time()
                 # totall = end_t - start_t

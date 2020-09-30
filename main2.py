@@ -6,6 +6,8 @@ Created on Thu May 31 14:46:15 2018
 """
 # import matplotlib
 # matplotlib.use('Agg')
+
+# @ref https://www.kancloud.cn/aollo/aolloopencv
 import cv2
 import caffe
 
@@ -95,10 +97,11 @@ class Main:
                     if cols > 0:
                         max_index = m_scores[0].argmax()
                         keyframe_number = int(m_scores[1][max_index])
-                        keyframe = capture.set(0,keyframe_number)
-    #                        print (keyframe_number , " \t########")
+                        keyframe = capture.set(cv2.CAP_PROP_POS_MSEC, keyframe_number)
+                        print ("keyframe_number=", keyframe_number, " \t########")
                         temp, keyframe = capture.read()
-                        pathh = '../d/keyframe' + str(keyframe_number) + '.png'
+                        # rough pick
+                        pathh = '../d/frame' + str(keyframe_number).rjust(6,"0") + '.png'
                         print ("############## \t 'Writing key frame at" , pathh, "'\t##############", "\a")
                         cv2.imwrite(pathh,keyframe)
                     print ("Different images = " , distt , "\t" , counter)
