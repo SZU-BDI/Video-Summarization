@@ -37,4 +37,6 @@ pip install scikit-build opencv-python sklearn -i https://mirrors.aliyun.com/pyp
 pip list
 
 
+# run example
+rm -f ../d/frame*.png && sh dk.sh python main3.py ../d/test.mp4 | tee jot.log
 ```
