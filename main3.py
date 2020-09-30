@@ -116,8 +116,8 @@ class Main:
                     m_scores[0].append(m_value)
                     m_scores[1].append(counter)
                     #}
-                counter = counter + fps
-                #counter = counter + 1
+                #counter = counter + fps
+                counter = counter + 1
                 frame1 = frame2
                 # end_t = time.time()
                 # totall = end_t - start_t
