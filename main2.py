@@ -145,10 +145,10 @@ class Shot_segmentation:
     def segment(frame1,frame2):
         #print ("Inside segment function")
         start_time1 = time.time()
-        resized_image1 = caffe.io.resize_image(frame1,[224,224])
-        resized_image2 = caffe.io.resize_image(frame2,[224,224])
-        
-        
+        #resized_image1 = caffe.io.resize_image(frame1,[224,224])
+        #resized_image2 = caffe.io.resize_image(frame2,[224,224])
+        resized_image1 = cv2.resize(frame1,(224,224))
+        resized_image2 = cv2.resize(frame2,(224,224))
 #        transformer.set_mean('data',img_mean)
         net.blobs['data'].reshape(1, 3, 224, 224)
         net.blobs['data'].data[...] = transformer.preprocess('data', resized_image1)
@@ -171,7 +171,8 @@ class Memorability_Prediction:
     def mem_calculation(frame1):
         #print ("Inside mem_calculation function")
         start_time1 = time.time()
-        resized_image = caffe.io.resize_image(frame1,[227,227])
+        #resized_image = caffe.io.resize_image(frame1,[227,227])
+        resized_image = cv2.resize(frame1,(227,227))
         net1.blobs['data'].data[...] = transformer1.preprocess('data', resized_image)
         value = net1.forward()
         value = value['fc8-euclidean']

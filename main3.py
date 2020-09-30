@@ -69,27 +69,38 @@ class Main:
         execution_time1 = end_time1 - start_time1
         #print ("*********** \t Execution Time in Memobarility = ", execution_time1, " secs \t***********")
         return value[0][0]
-    def shot_segment(frame1,frame2):
+    def shot_segment_distt(frame1,frame2):
+        t = []
+        t.append(time.time())
         #print ("Inside segment function")
-        start_time1 = time.time()
-        resized_image1 = caffe.io.resize_image(frame1,[224,224])
-        resized_image2 = caffe.io.resize_image(frame2,[224,224])
+        #start_time1 = time.time()
+        #resized_image1 = caffe.io.resize_image(frame1,[224,224])
+        #resized_image2 = caffe.io.resize_image(frame2,[224,224])
+        resized_image1 = cv2.resize(frame1,(224,224))
+        resized_image2 = cv2.resize(frame2,(224,224))
+        t.append(time.time())
 #        transformer.set_mean('data',img_mean)
         net.blobs['data'].reshape(1, 3, 224, 224)
         net.blobs['data'].data[...] = transformer.preprocess('data', resized_image1)
+        t.append(time.time())
         net.forward()
+        t.append(time.time())
         features1 = net.blobs['fc7'].data[0].reshape(1,1000)
         features1 = np.array(features1)
         net.blobs['data'].data[...] = transformer.preprocess('data', resized_image2)
+        t.append(time.time())
         net.forward()
+        t.append(time.time())
         features2 = net.blobs['fc7'].data[0].reshape(1,1000)
         features2 = np.array(features2)
-        
-        #t = caclulate_distance(self,features1,features2)
-        end_time1 = time.time()
-        execution_time1 = end_time1 - start_time1
+        #end_time1 = time.time()
+        #execution_time1 = end_time1 - start_time1
         #print ("*********** \t Execution Time in shot segmentation= ", execution_time1, " secs \t***********")
-        return euclidean_distances(features1,features2)
+        t.append(time.time())
+        rt=euclidean_distances(features1,features2)
+        t.append(time.time())
+        print (t)
+        return rt
     
     def main2():
         capture = cv2.VideoCapture(video_path)
@@ -108,7 +119,7 @@ class Main:
             ret2, frame2 = capture.read()
             if ret2 is True:
                 print (time.time(), "ttt=", ttt);
-                distt = Main.shot_segment(frame1,frame2) # time 0.5
+                distt = Main.shot_segment_distt(frame1,frame2) # time 0.5
                 print ('Processing ... ', ttt, ', of ', total_frames, 'with distt=',distt)
                 '''
                 if distt >= 40000:#{ different images , 25x4
