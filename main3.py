@@ -74,8 +74,6 @@ class Main:
         start_time1 = time.time()
         resized_image1 = caffe.io.resize_image(frame1,[224,224])
         resized_image2 = caffe.io.resize_image(frame2,[224,224])
-        
-        
 #        transformer.set_mean('data',img_mean)
         net.blobs['data'].reshape(1, 3, 224, 224)
         net.blobs['data'].data[...] = transformer.preprocess('data', resized_image1)
@@ -91,8 +89,60 @@ class Main:
         end_time1 = time.time()
         execution_time1 = end_time1 - start_time1
         #print ("*********** \t Execution Time in shot segmentation= ", execution_time1, " secs \t***********")
+        print ("debug features1=", features1, "features2=", features2);
         return euclidean_distances(features1,features2)
     
+    def main2():
+        capture = cv2.VideoCapture(video_path)
+        total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))#getting total number of frames
+        fps = int(capture.get(cv2.CAP_PROP_FPS))#getting frame rate
+        print ("FPS = " , fps, "\t total frames = ",total_frames)
+        m_scores = []
+        m_scores.append([])
+        m_scores.append([])
+        ret, frame1 = capture.read()
+        counter = 1
+        ttt = 0
+        start_t = time.time()
+        while(True):
+            ttt = ttt + 1
+            ret2, frame2 = capture.read()
+            if ret2 is True:
+                print (time.time(), "ttt=", ttt);
+                '''
+                distt = Main.shot_segment(frame1,frame2) # time 0.5
+                print ('Processing ... ', ttt, ', of ', total_frames, 'with distt=',distt)
+                if distt >= 40000:#{ different images , 25x4
+                    m_scores = np.array(m_scores)
+                    [rows,cols] = m_scores.shape
+                    
+                    if cols > 0:
+                        max_index = m_scores[0].argmax()
+                        keyframe_number = int(m_scores[1][max_index])
+                        keyframe = capture.set(cv2.CAP_PROP_POS_MSEC, keyframe_number)
+                        temp, keyframe = capture.read()
+                        pathh = '../d/frame' + str(keyframe_number).rjust(6,"0") + '.png'
+                        print ("############## \t 'Writing key frame at" , pathh, "'\t##############", "\a")
+                        cv2.imwrite(pathh,keyframe)
+                    print ("Different images = " , distt , "\t" , counter)
+                    m_scores = []
+                    m_scores.append([])
+                    m_scores.append([])
+                    #}
+                else:#{ same images
+                    print ("Similar images= " , distt , "\t" , counter)
+                    m_value = Main.mem_calculation(frame1)  # time 0.15
+                    m_scores[0].append(m_value)
+                    m_scores[1].append(counter)
+                counter = counter + fps
+                '''
+                frame1 = frame2
+            else:
+                end_t = time.time()
+                totall = end_t - start_t
+                print ("Time consumed in main function while = ", totall)
+                break # while
+        capture.release()  
     def main():
         capture = cv2.VideoCapture(video_path)
         total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))#getting total number of frames
@@ -163,7 +213,7 @@ class Main:
 
     
 if __name__ == '__main__':
-    Main.main()
+    Main.main2()
 
 #class Postprocessing:
 #    def histogram_difference():
