@@ -70,11 +70,13 @@ q_frame = []
 flg_end = False
 total_frames = 0
 fps = 0
+counter = 0
+fps_target = 4
 
 import threading
 
 def th_handling():
-    global flg_end, total_frames
+    global flg_end, total_frames, counter
     hhh = 0
     frame1_a, frame2_a = (False,False)
     while True:
@@ -92,7 +94,7 @@ def th_handling():
                 #break #while
             else:
                 skip = 0
-                while skip< fps/3:
+                while skip <= fps/fps_target:
                     skip += 1
                     hhh +=1
                     len_q_frame = len(q_frame)
@@ -103,28 +105,19 @@ def th_handling():
                 frame2_a = frame_pop_a
                 distt = shot_segment_distt(frame1_a[1],frame2_a[1]) 
                 distt = int(distt)
-                fc8 = mem_calculation(frame1_a[2]) 
-                print ('... ', hhh, ', of ', total_frames, ',distt=',distt, ',fc8=',fc8)
-                # delete frame2_a
+                print ('... ', hhh, ', of ', total_frames, ',distt=',distt)
+                #fc8 = mem_calculation(frame1_a[2]) 
+                #print ('... ', hhh, ', of ', total_frames, ',distt=',distt, ',fc8=',fc8)
+                if distt >= 20000:
+                    pathh = '../d/frame' + str(counter).rjust(3,"0") + '_' + str(hhh).rjust(6,"0") + '_' + str(distt).rjust(5,'0') + '.png'
+                    print (pathh)
+                    counter = counter + 1
+                    cv2.imwrite(pathh,frame2_a[0]) # tmp. test
                 frame1_a = frame2_a
                 '''
                 m_scores = []
                 m_scores.append([])
                 m_scores.append([])
-                '''
-                '''
-                distt = shot_segment_distt(frame1,frame2) 
-                distt = int(distt)
-                fc8 = mem_calculation(frame1) 
-                print ('Processing ... ', ttt, ', of ', total_frames, ',distt=',distt, ',fc8=',fc8)
-                if distt >= 20000:
-                    pathh = '../d/frame' + str(counter).rjust(3,"0") + '_' + str(ttt).rjust(6,"0") + '_' + str(distt).rjust(5,'0') + '.png'
-                    print (pathh)
-                    counter = counter + 1
-                    cv2.imwrite(pathh,frame2) # tmp. test
-                '''
-                #
-                '''
                 if distt >= 40000:#{ different images , 25x4
                     m_scores = np.array(m_scores)
                     [rows,cols] = m_scores.shape
@@ -191,8 +184,8 @@ def main4():
 start_t = time.time()
 main4()
 end_t = time.time()
-print ("FPS = " , fps, "\t total frames = ",total_frames)
-print("end w/ time=", end_t - start_t)
+print ("SRC FPS = " , fps, "\t total frames = ",total_frames)
+print("TGT FPS=",fps_target," output=", counter, " w/ time=", end_t - start_t)
 
 #if __name__ == '__main__':
 #    Main.main2()
