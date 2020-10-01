@@ -67,30 +67,61 @@ def shot_segment_distt(frame1,frame2):
     t.append(time.time())
     #print (t)
     return rt
-def main2(): #{
+
+size_pool = 1000
+q_frame = []
+flg_end = False
+
+import threading
+
+def th_handling():
+    global flg_end
+    hhh = 0
+    while True:
+        len_q_frame = len(q_frame)
+        print('hhh=', hhh, ", len(q_frame)=", len_q_frame)
+        if len_q_frame>0:
+            hhh +=1 
+            frame_pop_a = q_frame.pop()
+            #time.sleep(0.1) # TODO handling...
+        else:
+            #print("flg_end=", flg_end);
+            if (flg_end):
+                break
+            time.sleep(0.1)
+
+def th_frames():
+    global flg_end
     capture = cv2.VideoCapture(video_path)
     total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))#getting total number of frames
     fps = int(capture.get(cv2.CAP_PROP_FPS))#getting frame rate
+    '''
     print ("FPS = " , fps, "\t total frames = ",total_frames)
     m_scores = []
     m_scores.append([])
     m_scores.append([])
-    ret, frame1 = capture.read()
-    counter = 1
+    '''
+    #ret, frame1 = capture.read()
+    counter = 0
     ttt = 0
     distt = 0
 
-    pathh = '../d/frame' + str(counter).rjust(3,"0") + '_' + str(ttt).rjust(6,"0") + '_' + str(distt).rjust(5,'0') + '.png'
-    print (pathh)
-    counter = counter + 1
-    cv2.imwrite(pathh,frame1) # tmp. test
+    #pathh = '../d/frame' + str(counter).rjust(3,"0") + '_' + str(ttt).rjust(6,"0") + '_' + str(distt).rjust(5,'0') + '.png'
+    #print (pathh)
+    #counter = counter + 1
+    #cv2.imwrite(pathh,frame1) # tmp. test
 
     start_t = time.time()
     while(True):
         ttt = ttt + 1
         ret2, frame2 = capture.read()
         if ret2 is True:
-            print (time.time(), "ttt=", ttt);
+            #print (time.time(), "ttt=", ttt);
+            while len(q_frame)>size_pool:
+                #print("q full, wait for handling")
+                time.sleep(0.1)
+            q_frame.append((frame2,cv2.resize(frame2,(224,224))))
+            '''
             distt = shot_segment_distt(frame1,frame2) 
             distt = int(distt)
             fc8 = mem_calculation(frame1) 
@@ -100,6 +131,8 @@ def main2(): #{
                 print (pathh)
                 counter = counter + 1
                 cv2.imwrite(pathh,frame2) # tmp. test
+            '''
+            #
             '''
             if distt >= 40000:#{ different images , 25x4
                 m_scores = np.array(m_scores)
@@ -125,15 +158,24 @@ def main2(): #{
                 m_scores[1].append(counter)
                 #}
             counter = counter + fps
-            '''
             frame1 = frame2
+            '''
         else:
+            flg_end = True
             end_t = time.time()
             totall = end_t - start_t
-            print ("Time consumed in main function= ", totall, ', total output=', counter)
+            print ("time total=", totall, ', ttt=', ttt, ', output=', counter)
             break # while
     capture.release()  
+
+def main4(): #{
+    t_hdl = threading.Thread(target=th_handling)
+    t_frm = threading.Thread(target=th_frames)
+    t_hdl.start()
+    t_frm.start()
+    print("TODO join() and then quick");
+
 #if __name__ == '__main__':
 #    Main.main2()
-main2()
+main4()
 
