@@ -71,7 +71,7 @@ flg_end = False
 total_frames = 0
 fps = 0
 counter = 0
-fps_target = 4
+fps_target = 3
 thres_distt = 20000
 
 import threading
