@@ -72,7 +72,7 @@ total_frames = 0
 fps = 0
 counter = 0
 fps_target = 4
-thres_distt = 40000
+thres_distt = 20000
 
 import threading
 
@@ -155,8 +155,8 @@ def th_handling():
 def th_producer():
     global flg_end, total_frames, fps
     capture = cv2.VideoCapture(video_path)
-    total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-    fps = int(capture.get(cv2.CAP_PROP_FPS))
+    #total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+    #fps = int(capture.get(cv2.CAP_PROP_FPS))
     while(True):
         ret2, frame2 = capture.read()
         if ret2 is True:
@@ -173,7 +173,7 @@ def th_producer():
             break # while
     capture.release()  
 
-def main4():
+def main5():
     t_hdl = threading.Thread(target=th_handling) # consumer
     t_prd = threading.Thread(target=th_producer) # producer
     t_hdl.start()
@@ -183,9 +183,9 @@ def main4():
 
 #
 start_t = time.time()
-main4()
+main5()
 end_t = time.time()
-print ("SRC FPS = " , fps, "\t total frames = ",total_frames)
+#print ("SRC FPS = " , fps, "\t total frames = ",total_frames)
 print("TGT FPS=",fps_target," output=", counter, " w/ time=", end_t - start_t)
 
 #if __name__ == '__main__':
