@@ -38,5 +38,5 @@ pip list
 
 
 # run example
-rm -f ../d/frame*.png && sh dk.sh python main6.py ../d/test.mp4 | tee jot.log
+rm -f ../d/frame*.png && sh dk.sh python main7.py ../d/test1.mp4 | tee jot.log
 ```

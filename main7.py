@@ -56,19 +56,6 @@ signal.signal(signal.SIGTERM, sigint_handler)
 
 import threading
 
-#def th_pre_proc(): #{
-#    global flg_end
-#    while True:
-#        if (flg_end):
-#            break # quick while True
-#        len_q_frame = len(q_frame_raw)
-#        if len_q_frame>0:
-#            frame_pop_a = q_frame_raw.pop()
-#            frame_pop_a[3] = get_features(frame_pop_a[1])
-#            q_frame.append(frame_pop_a)
-#        else:
-#            time.sleep(0.01) # let cpu have a rest
-#    #} th_pre_proc()
 def th_handling(): #{
     global flg_end, counter, fps, total_frames
     hhh = 0
@@ -88,10 +75,12 @@ def th_handling(): #{
             frame_pop_a = q_frame_raw.pop()
             if not frame1_a:
                 frame1_a = frame_pop_a
-                frame1_a_f = get_features(frame1_a[1])
+                #frame1_a_f = get_features(frame1_a[1])
+                frame1_a_f = frame1_a[3]
             else:
                 frame2_a = frame_pop_a
-                frame2_a_f = get_features(frame2_a[1])
+                #frame2_a_f = get_features(frame2_a[1])
+                frame2_a_f = frame2_a[3]
                 distt = euclidean_distances(frame1_a_f,frame2_a_f) 
                 distt = int(distt)
                 print ('... ', hhh, ',distt=',distt)
@@ -147,16 +136,13 @@ def th_producer():
                 time.sleep(0.1)
             frame_resized = cv2.resize(frame,(224,224))
             frame_memcalc = False # not using now...
-            #the_features = get_features(frame_resized)
+            the_features = get_features(frame_resized)
             q_frame_raw.append((frame, frame_resized, frame_resized,
-                #the_features
+                the_features
                 ))
-            #time.sleep(0.01)
         else:
             flg_end_should = True
-            #time.sleep(0.2)
             break # while
-        #time.sleep(0.1)
     capture.release()  
 
 start_t = time.time()
