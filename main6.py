@@ -136,12 +136,14 @@ def th_handling(): #{
             frame_pop_a = q_frame_raw.pop()
             if not frame1_a:
                 frame1_a = frame_pop_a
-                frame1_a_f = get_features(frame1_a[1])
                 #frame1_a_f = get_features(cv2.resize(frame1_a[0],(224,224)))
+                #frame1_a_f = frame1_a[3]
+                frame1_a_f = get_features(frame1_a[1])
             else:
                 frame2_a = frame_pop_a
-                frame2_a_f = get_features(frame2_a[1])
                 #frame2_a_f = get_features(cv2.resize(frame2_a[0],(224,224)))
+                #frame2_a_f = frame2_a[3]
+                frame2_a_f = get_features(frame2_a[1])
                 # distt = shot_segment_distt(frame1_a[1],frame2_a[1]) 
                 # distt = euclidean_distances(frame1_a[3],frame2_a[3]) 
                 distt = euclidean_distances(frame1_a_f,frame2_a_f) 
@@ -188,7 +190,7 @@ def th_producer():
         #capture.set(1,total_frames + fps_jump) # NOTES: not good, slow
         skip = 0 + fps_jump
         while True:
-            ret2, frame2 = capture.read()
+            ret2, frame = capture.read()
             skip -= 1
             if not ret2 or skip==0:
                 break
@@ -198,9 +200,11 @@ def th_producer():
             total_frames += fps_jump - skip
             while len(q_frame_raw)>size_pool:
                 time.sleep(0.1)
-            q_frame_raw.append((frame2,
-                cv2.resize(frame2,(224,224)),
-                #cv2.resize(frame2,(227,227)),
+            frame_resized = cv2.resize(frame,(224,224))
+            frame_memcalc = False # not using now...
+            #the_features = get_features(frame_resized)
+            q_frame_raw.append((frame, frame_resized, frame_resized,
+                #the_features
                 ))
             #time.sleep(0.01)
         else:
