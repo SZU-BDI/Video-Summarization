@@ -48,7 +48,7 @@ def mem_calculation(resized_image):
 '''
 
 def get_features(image):
-    net.blobs['data'].reshape(1, 3, 224, 224)
+    #net.blobs['data'].reshape(1, 3, 224, 224)
     net.blobs['data'].data[...] = transformer.preprocess('data', image)
     net.forward() 
     features = net.blobs['fc7'].data[0].reshape(1,1000)
@@ -129,7 +129,7 @@ def th_handling(): #{
         #len_q_frame = len(q_frame)
         len_q_frame = len(q_frame_raw)
         if len_q_frame>0:
-            print('hhh=', hhh, ", len(q_frame)=", len_q_frame, 'total_frames=',total_frames)
+            print('hhh=', hhh, ", len_q_frame=", len_q_frame, 'total_frames=',total_frames)
             #hhh +=1 
             hhh += fps_jump
             #frame_pop_a = q_frame.pop()
@@ -137,11 +137,13 @@ def th_handling(): #{
             if not frame1_a:
                 frame1_a = frame_pop_a
                 frame1_a_f = get_features(frame1_a[1])
+                #frame1_a_f = get_features(cv2.resize(frame1_a[0],(224,224)))
             else:
                 frame2_a = frame_pop_a
                 frame2_a_f = get_features(frame2_a[1])
-                #distt = shot_segment_distt(frame1_a[1],frame2_a[1]) 
-                #distt = euclidean_distances(frame1_a[3],frame2_a[3]) 
+                #frame2_a_f = get_features(cv2.resize(frame2_a[0],(224,224)))
+                # distt = shot_segment_distt(frame1_a[1],frame2_a[1]) 
+                # distt = euclidean_distances(frame1_a[3],frame2_a[3]) 
                 distt = euclidean_distances(frame1_a_f,frame2_a_f) 
                 distt = int(distt)
                 #fc8 = mem_calculation(frame1_a[2]) 
@@ -151,8 +153,8 @@ def th_handling(): #{
                     print (pathh)
                     counter = counter + 1
                     cv2.imwrite(pathh,frame2_a[0]) # tmp. test
-                frame1_a = frame2_a
-                frame1_a_f = frame2_a_f
+                    frame1_a = frame2_a
+                    frame1_a_f = frame2_a_f
         else:
             time.sleep(0.1) # let cpu have a rest
     # } th_handling()
@@ -183,20 +185,24 @@ def th_producer():
     while(True):
         if flg_end:
             break
-        capture.set(1,total_frames + fps_jump)
-        ret2, frame2 = capture.read()
+        #capture.set(1,total_frames + fps_jump) # NOTES: not good, slow
+        skip = 0 + fps_jump
+        while True:
+            ret2, frame2 = capture.read()
+            skip -= 1
+            if not ret2 or skip==0:
+                break
         if ret2 is True:
             #total_frames += 1
-            total_frames += fps_jump
+            #total_frames += fps_jump
+            total_frames += fps_jump - skip
             while len(q_frame_raw)>size_pool:
                 time.sleep(0.1)
-            q_frame_raw.append([frame2,
+            q_frame_raw.append((frame2,
                 cv2.resize(frame2,(224,224)),
                 #cv2.resize(frame2,(227,227)),
-                False,
-                False,
-                ])
-            time.sleep(0.01)
+                ))
+            #time.sleep(0.01)
         else:
             flg_end = True
             break # while
@@ -205,8 +211,8 @@ def th_producer():
 start_t = time.time()
 fps = get_frame_rate(video_path)
 #t_hdp = threading.Thread(target=th_pre_proc) # pre-processing
-t_hdl = threading.Thread(target=th_handling) # consumer
 t_prd = threading.Thread(target=th_producer) # producer
+t_hdl = threading.Thread(target=th_handling) # consumer
 #t_hdp.start()
 t_hdl.start()
 t_prd.start()
