@@ -56,19 +56,19 @@ signal.signal(signal.SIGTERM, sigint_handler)
 
 import threading
 
-def th_pre_proc(): #{
-    global flg_end
-    while True:
-        if (flg_end):
-            break # quick while True
-        len_q_frame = len(q_frame_raw)
-        if len_q_frame>0:
-            frame_pop_a = q_frame_raw.pop()
-            frame_pop_a[3] = get_features(frame_pop_a[1])
-            q_frame.append(frame_pop_a)
-        else:
-            time.sleep(0.01) # let cpu have a rest
-    #} th_pre_proc()
+#def th_pre_proc(): #{
+#    global flg_end
+#    while True:
+#        if (flg_end):
+#            break # quick while True
+#        len_q_frame = len(q_frame_raw)
+#        if len_q_frame>0:
+#            frame_pop_a = q_frame_raw.pop()
+#            frame_pop_a[3] = get_features(frame_pop_a[1])
+#            q_frame.append(frame_pop_a)
+#        else:
+#            time.sleep(0.01) # let cpu have a rest
+#    #} th_pre_proc()
 def th_handling(): #{
     global flg_end, counter, fps, total_frames
     hhh = 0
@@ -122,7 +122,7 @@ def get_frame_rate(filename):
     return -1
 
 def th_producer():
-    global flg_end,fps,total_frames, fps_jump
+    global flg_end, flg_end_should, fps,total_frames, fps_jump
     capture = cv2.VideoCapture(video_path)
 
     # NOTES: error when big mp4
@@ -130,6 +130,8 @@ def th_producer():
     #fps = int(capture.get(cv2.CAP_PROP_FPS))
     fps_jump = int(fps / fps_target)
     while(True):
+        if flg_end_should:
+            break
         if flg_end:
             break
         #capture.set(1,total_frames + fps_jump) # NOTES: not good, slow
@@ -152,19 +154,17 @@ def th_producer():
             #time.sleep(0.01)
         else:
             flg_end_should = True
-            time.sleep(0.2)
+            #time.sleep(0.2)
             break # while
+        #time.sleep(0.1)
     capture.release()  
 
 start_t = time.time()
 fps = get_frame_rate(video_path)
-#t_hdp = threading.Thread(target=th_pre_proc) # pre-processing
 t_prd = threading.Thread(target=th_producer) # producer
 t_hdl = threading.Thread(target=th_handling) # consumer
-#t_hdp.start()
 t_hdl.start()
 t_prd.start()
-#t_hdp.join()
 t_hdl.join()
 t_prd.join()
 end_t = time.time()
