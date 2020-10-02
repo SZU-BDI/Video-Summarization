@@ -16,17 +16,31 @@ video_path=sys.argv[1]
 proto = "VS-Python/Models/mobilenet_v2_deploy.prototxt"
 model = "../d/mobilenet_v2.caffemodel"
 caffe.set_mode_gpu()
+
 #caffe.set_mode_cpu()
 net = caffe.Net(proto, model, caffe.TEST)
-
 transformer = caffe.io.Transformer({'data':net.blobs['data'].data.shape})
 transformer.set_transpose('data',(2, 0, 1))
 transformer.set_channel_swap('data', (2, 1, 0))
 transformer.set_raw_scale('data', 255)
-
 net.blobs['data'].reshape(1, 3, 224, 224)
+#########################################################################
+net2 = caffe.Net(proto, model, caffe.TEST)
+transformer2 = caffe.io.Transformer({'data':net2.blobs['data'].data.shape})
+transformer2.set_transpose('data',(2, 0, 1))
+transformer2.set_channel_swap('data', (2, 1, 0))
+transformer2.set_raw_scale('data', 255)
+net2.blobs['data'].reshape(1, 3, 224, 224)
+#########################################################################
 
 def get_features(image):
+    net.blobs['data'].data[...] = transformer.preprocess('data', image)
+    net.forward() 
+    features = net.blobs['fc7'].data[0].reshape(1,1000)
+    features = np.array(features)
+    return features
+
+def get_features2(image):
     net.blobs['data'].data[...] = transformer.preprocess('data', image)
     net.forward() 
     features = net.blobs['fc7'].data[0].reshape(1,1000)
@@ -128,7 +142,7 @@ def th_producer():
         while True:
             ret2, frame = capture.read()
             skip -= 1
-            if not ret2 or skip<=0:
+            if not ret2 or skip==0:
                 break
         if ret2 is True:
             total_frames += fps_jump - skip
@@ -138,7 +152,8 @@ def th_producer():
             frame_memcalc = False # not using now...
             the_features = get_features(frame_resized)
             q_frame_raw.append((frame, frame_resized, frame_resized,
-                the_features
+                the_features,
+                total_frames,
                 ))
         else:
             flg_end_should = True
