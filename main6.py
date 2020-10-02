@@ -55,38 +55,39 @@ def get_features(image):
     features = np.array(features)
     return features
 
-#def shot_segment_distt(resized_image1,resized_image2):
-#    return euclidean_distances(get_features(resized_image1),get_features(resized_image2))
-#    t = []
-#    t.append(time.time())
-##        transformer.set_mean('data',img_mean)
-#    net.blobs['data'].reshape(1, 3, 224, 224)
-#    net.blobs['data'].data[...] = transformer.preprocess('data', resized_image1)
-#    t.append(time.time())
-#    net.forward() # 0.08
-#    t.append(time.time())
-#    features1 = net.blobs['fc7'].data[0].reshape(1,1000)
-#    features1 = np.array(features1)
-#
-#    #net.blobs['data'].reshape(1, 3, 224, 224) # wjc tmp test...
-#    net.blobs['data'].data[...] = transformer.preprocess('data', resized_image2)
-#    t.append(time.time())
-#    net.forward() # 0.08
-#    t.append(time.time())
-#    features2 = net.blobs['fc7'].data[0].reshape(1,1000)
-#    features2 = np.array(features2)
-#
-#    t.append(time.time())
-#    rt=euclidean_distances(features1,features2)
-#    t.append(time.time())
-#    print('t=',t)
-#    return rt
+def shot_segment_distt(resized_image1,resized_image2):
+    return euclidean_distances(get_features(resized_image1),get_features(resized_image2))
+    t = []
+    t.append(time.time())
+#        transformer.set_mean('data',img_mean)
+    net.blobs['data'].reshape(1, 3, 224, 224)
+    net.blobs['data'].data[...] = transformer.preprocess('data', resized_image1)
+    t.append(time.time())
+    net.forward() # 0.08
+    t.append(time.time())
+    features1 = net.blobs['fc7'].data[0].reshape(1,1000)
+    features1 = np.array(features1)
+
+    #net.blobs['data'].reshape(1, 3, 224, 224) # wjc tmp test...
+    net.blobs['data'].data[...] = transformer.preprocess('data', resized_image2)
+    t.append(time.time())
+    net.forward() # 0.08
+    t.append(time.time())
+    features2 = net.blobs['fc7'].data[0].reshape(1,1000)
+    features2 = np.array(features2)
+
+    t.append(time.time())
+    rt=euclidean_distances(features1,features2)
+    t.append(time.time())
+    print('t=',t)
+    return rt
 
 size_pool = 1000
 q_frame_raw = []
 q_frame = []
 fps = 25
 fps_target = 3
+fps_jump = 0
 total_frames = 0
 counter = 0
 thres_distt = 20000
@@ -106,47 +107,42 @@ import threading
 def th_pre_proc(): #{
     global flg_end
     while True:
+        if (flg_end):
+            break # quick while True
         len_q_frame = len(q_frame_raw)
         if len_q_frame>0:
             frame_pop_a = q_frame_raw.pop()
             frame_pop_a[3] = get_features(frame_pop_a[1])
             q_frame.append(frame_pop_a)
         else:
-            if (flg_end):
-                break # quick while True
-            else:
-                time.sleep(0.01) # let cpu have a rest
+            time.sleep(0.01) # let cpu have a rest
     #} th_pre_proc()
 def th_handling(): #{
     global flg_end, counter, fps, total_frames
     hhh = 0
     frame1_a, frame2_a = (False,False)
+    frame1_a_f = False
+    frame2_a_f = False
     while True:
-        len_q_frame = len(q_frame)
-        print('hhh=', hhh, ", len(q_frame)=", len_q_frame, 'total_frames=',total_frames)
+        if (flg_end):
+            break # quick while True
+        #len_q_frame = len(q_frame)
+        len_q_frame = len(q_frame_raw)
         if len_q_frame>0:
-            hhh +=1 
-            frame_pop_a = q_frame.pop()
+            print('hhh=', hhh, ", len(q_frame)=", len_q_frame, 'total_frames=',total_frames)
+            #hhh +=1 
+            hhh += fps_jump
+            #frame_pop_a = q_frame.pop()
+            frame_pop_a = q_frame_raw.pop()
             if not frame1_a:
                 frame1_a = frame_pop_a
-                #pathh = '../d/frame' + str(counter).rjust(3,"0") + '_' + str(hhh).rjust(6,"0") + '_' + str(distt).rjust(5,'0') + '.png'
-                #print (pathh)
-                #counter = counter + 1
-                #cv2.imwrite(pathh,frame1) # tmp. test
-                #break #while
+                frame1_a_f = get_features(frame1_a[1])
             else:
-                #skip = 0
-                #while skip <= fps/fps_target:
-                #    skip += 1
-                #    hhh +=1
-                #    len_q_frame = len(q_frame)
-                #    if len_q_frame>0:
-                #        frame_pop_a = q_frame.pop()
-                #    else:
-                #        break #current while....
                 frame2_a = frame_pop_a
+                frame2_a_f = get_features(frame2_a[1])
                 #distt = shot_segment_distt(frame1_a[1],frame2_a[1]) 
-                distt = euclidean_distances(frame1_a[3],frame2_a[3]) 
+                #distt = euclidean_distances(frame1_a[3],frame2_a[3]) 
+                distt = euclidean_distances(frame1_a_f,frame2_a_f) 
                 distt = int(distt)
                 #fc8 = mem_calculation(frame1_a[2]) 
                 print ('... ', hhh, ',distt=',distt)
@@ -156,11 +152,9 @@ def th_handling(): #{
                     counter = counter + 1
                     cv2.imwrite(pathh,frame2_a[0]) # tmp. test
                 frame1_a = frame2_a
+                frame1_a_f = frame2_a_f
         else:
-            if (flg_end):
-                break # quick while True
-            else:
-                time.sleep(0.1) # let cpu have a rest
+            time.sleep(0.1) # let cpu have a rest
     # } th_handling()
 import sys
 import os
@@ -178,18 +172,22 @@ def get_frame_rate(filename):
     return -1
 
 def th_producer():
-    global flg_end,fps,total_frames
+    global flg_end,fps,total_frames, fps_jump
     capture = cv2.VideoCapture(video_path)
+
+    # NOTES: error when big mp4
     #total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
     #fps = int(capture.get(cv2.CAP_PROP_FPS))
-    jump = int(fps / fps_target)
-    print ("jump=", jump)
+
+    fps_jump = int(fps / fps_target)
     while(True):
-        capture.set(1,total_frames+jump)
+        if flg_end:
+            break
+        capture.set(1,total_frames + fps_jump)
         ret2, frame2 = capture.read()
         if ret2 is True:
             #total_frames += 1
-            total_frames += jump
+            total_frames += fps_jump
             while len(q_frame_raw)>size_pool:
                 time.sleep(0.1)
             q_frame_raw.append([frame2,
@@ -206,13 +204,13 @@ def th_producer():
 
 start_t = time.time()
 fps = get_frame_rate(video_path)
+#t_hdp = threading.Thread(target=th_pre_proc) # pre-processing
 t_hdl = threading.Thread(target=th_handling) # consumer
-t_hdp = threading.Thread(target=th_pre_proc) # pre-processing
 t_prd = threading.Thread(target=th_producer) # producer
-t_hdp.start()
+#t_hdp.start()
 t_hdl.start()
 t_prd.start()
-t_hdp.join()
+#t_hdp.join()
 t_hdl.join()
 t_prd.join()
 end_t = time.time()
