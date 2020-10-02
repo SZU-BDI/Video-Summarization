@@ -43,6 +43,7 @@ total_frames = 0
 counter = 0
 thres_distt = 20000
 
+flg_end_should = False
 flg_end = False
 def sigint_handler(signum, frame):
     global flg_end
@@ -102,6 +103,9 @@ def th_handling(): #{
                     frame1_a = frame2_a
                     frame1_a_f = frame2_a_f
         else:
+            if flg_end_should:
+                flg_end = True
+                break
             time.sleep(0.1) # let cpu have a rest
     # } th_handling()
 import os
@@ -147,7 +151,8 @@ def th_producer():
                 ))
             #time.sleep(0.01)
         else:
-            flg_end = True
+            flg_end_should = True
+            time.sleep(0.2)
             break # while
     capture.release()  
 
